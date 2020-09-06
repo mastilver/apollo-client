@@ -2129,7 +2129,7 @@ describe('useQuery Hook', () => {
 
       const Component = () => {
         const [skip, setSkip] = useState(true);
-        const { loading, data } = useQuery(CAR_QUERY, { skip });
+        const { loading, data } = useQuery(CAR_QUERY, { skip, fetchPolicy: 'no-cache', nextFetchPolicy: 'no-cache', pollInterval: 100_000 });
 
         switch (++renderCount) {
           case 1:
@@ -2144,6 +2144,15 @@ describe('useQuery Hook', () => {
           case 3:
             expect(loading).toBeFalsy();
             expect(data).toEqual(CAR_RESULT_DATA);
+            setTimeout(() => setSkip(true));
+            break;
+          case 4:
+            expect(loading).toBeFalsy();
+            expect(data).toBeUndefined();
+            setTimeout(() => setSkip(false));
+          case 5:
+            expect(loading).toBeTruthy();
+            expect(data).toBeUndefined();
             break;
           default:
             reject("too many renders");
@@ -2159,7 +2168,7 @@ describe('useQuery Hook', () => {
       );
 
       return wait(() => {
-        expect(renderCount).toBe(3);
+        expect(renderCount).toBe(5);
       }).then(resolve, reject);
     });
 
